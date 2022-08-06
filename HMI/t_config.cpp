@@ -1,0 +1,615 @@
+#include "t_config.h"
+/*==========================*/
+Config::Config(QObject* parent):QObject(parent){
+    numberMap.insert(-3,"fuSan");
+    numberMap.insert(-2,"fuEr");
+    numberMap.insert(-1,"fuYi");
+    numberMap.insert(1,"yi");
+    numberMap.insert(2,"er");
+    numberMap.insert(3,"san");
+    numberMap.insert(4,"si");
+    numberMap.insert(5,"wu");
+    numberMap.insert(6,"liu");
+    numberMap.insert(7,"qi");
+    numberMap.insert(8,"ba");
+    numberMap.insert(9,"jiu");
+    numberMap.insert(10,"shi");
+    numberMap.insert(11,"shiYi");
+    numberMap.insert(12,"shiEr");
+    numberMap.insert(13,"shiSan");
+    numberMap.insert(14,"shiSi");
+    numberMap.insert(15,"shiWu");
+    numberMap.insert(16,"shiLiu");
+    numberMap.insert(17,"shiQi");
+    numberMap.insert(18,"shiBa");
+    numberMap.insert(19,"shiJiu");
+    numberMap.insert(20,"erShi");
+    numberMap.insert(21,"erShiYi");
+    numberMap.insert(22,"erShiEr");
+    numberMap.insert(23,"erShiSan");
+    numberMap.insert(24,"erShiSi");
+    numberMap.insert(25,"erShiWu");
+    numberMap.insert(26,"erShiLiu");
+    numberMap.insert(27,"erShiQi");
+    numberMap.insert(28,"erShiBa");
+    numberMap.insert(29,"erShiJiu");
+    numberMap.insert(30,"sanShi");
+    numberMap.insert(31,"sanShiYi");
+    numberMap.insert(32,"sanShiEr");
+    numberMap.insert(33,"sanShiSan");
+    numberMap.insert(34,"sanShiSi");
+    numberMap.insert(35,"sanShiWu");
+    numberMap.insert(36,"sanShiLiu");
+    numberMap.insert(37,"sanShiQi");
+    numberMap.insert(38,"sanShiBa");
+    numberMap.insert(39,"sanShiJiu");
+    numberMap.insert(40,"siShi");
+    createConfigFile();
+}
+void Config::createConfigFile(){
+    QFile file(_configPath);
+    if(file.exists()){
+        file.open(QIODevice::ReadOnly);
+        QByteArray bytes = file.readAll();
+        file.close();
+        QJsonParseError error;
+        QJsonDocument doc=QJsonDocument::fromJson(bytes,&error);
+        _configJson = doc.object();
+        if(error.error!=QJsonParseError::NoError){
+            coverConfigFile();
+        }else{
+            repairConfigFile();
+        }
+    }else{
+        coverConfigFile();
+    }
+}
+void Config::coverConfigFile(){
+    _configJson.insert("advertWordList",QJsonArray({"嗨！我是吉立达机器人超市的小吉机器人，来扫码了解我一下吧，我可以24小时无人接触送货到家，亲，新活动新商品我们在持续增加中，每天都有不一样，要记的常来微信小程序哟！爱 你 哟！"}));
+    _configJson.insert("areaName","");
+    _configJson.insert("password","");
+    _configJson.insert("isUsingElevatorAdvert",false);
+    _configJson.insert("isUsingLowPowerVoice",false);
+    _configJson.insert("videoSinceTime",2);//录制视频间隔时间，单位：分钟
+    _configJson.insert("pictureNumber",100);
+    _configJson.insert("videoNumber",10);
+    _configJson.insert("isUsingAutoUpdateMap",false);
+    QJsonObject baiduTokenObj;
+    baiduTokenObj.insert("access_token","24.358c98513907923b89347c9bae5b9192.2592000.1640490896.282335-17650598");
+    baiduTokenObj.insert("expires_in",2592000);
+    baiduTokenObj.insert("getTime",1637898896);
+    baiduTokenObj.insert("refresh_token","25.5f2d4275d6730461048f1b655e833c1c.315360000.1953258896.282335-17650598");
+    baiduTokenObj.insert("scope","brain_asr_async brain_speech_realtime audio_voice_assistant_get brain_enhanced_asr audio_tts_post public brain_all_scope picchain_test_picchain_api_scope wise_adapt lebo_resource_base lightservice_public hetu_basic lightcms_map_poi kaidian_kaidian ApsMisTest_Test权限 vis-classify_flower lpq_开放 cop_helloScope ApsMis_fangdi_permission smartapp_snsapi_base smartapp_mapp_dev_manage iop_autocar oauth_tp_app smartapp_smart_game_openapi oauth_sessionkey smartapp_swanid_verify smartapp_opensource_openapi smartapp_opensource_recapi fake_face_detect_开放Scope vis-ocr_虚拟人物助理 idl-video_虚拟人物助理 smartapp_component smartapp_search_plugin avatar_video_test b2b_tp_openapi b2b_tp_openapi_online");
+    baiduTokenObj.insert("session_key","9mzdCPHWeJB5KH7gSDmbqVicCe76YEiIJIWPgnuGaB05OT2zNPdQmoQWXgkfPjWV/R559xoQcEoL1kK1+F5AsRAKLpah7Q==");
+    baiduTokenObj.insert("session_secret","9b249aa0b1f498758d22023e05400dd2");
+    _configJson.insert("baiduToken",baiduTokenObj);
+    QJsonObject pathObj;
+    pathObj.insert("baiduVoicePath","/DeliveryRobot/DeliveryRobot/Music/BaiduVoice");
+    pathObj.insert("mapPath","/jld_profile");
+    pathObj.insert("notePath","/DeliveryRobot/DeliveryRobot/Note");
+    pathObj.insert("videoPath","/DeliveryRobot/DeliveryRobot/Camera/Video");
+    pathObj.insert("imagePath","/DeliveryRobot/DeliveryRobot/Camera/Image");
+    pathObj.insert("upperSoftPath","/DeliveryRobot/DeliveryRobot/Download/UpperSoft");
+    pathObj.insert("middleSoftPath","/DeliveryRobot/DeliveryRobot/Download/MiddleSoft");
+    pathObj.insert("lowerSoftPath","/DeliveryRobot/DeliveryRobot/Download/LowerSoft");
+    pathObj.insert("robotInfoPath","/DeliveryRobot/DeliveryRobot/Config/robotInfo.json");
+    _configJson.insert("path",pathObj);
+    QJsonObject voicePersonObj;
+    voicePersonObj.insert("per",4);
+    voicePersonObj.insert("pit",5);
+    voicePersonObj.insert("spd",5);
+    voicePersonObj.insert("vol",5);
+    _configJson.insert("voicePerson",voicePersonObj);
+    QJsonObject voiceTextObj;
+    voiceTextObj.insert("dontTouchMe","别碰我，谢谢。");
+    voiceTextObj.insert("init","初始化完成，现在可以送货了。");
+    voiceTextObj.insert("startSendGoods","送货去咯，待会儿见。");
+    voiceTextObj.insert("noPower","我快没电了，请给我充电吧。");
+    voiceTextObj.insert("retentionGoods","商品滞留了，处理一下吧。");
+    voiceTextObj.insert("returnGoods","客户退货了，处理一下吧。");
+    voiceTextObj.insert("test","这是一段测试语音，如果还可以，点击应用吧。");
+    voiceTextObj.insert("elevatorGiveWayIn","您好，请把中间的位置留给我，谢谢。");
+    voiceTextObj.insert("elevatorGiveWayOut","我要出电梯了，请让一下，谢谢。");
+    voiceTextObj.insert("codeTrue","如您购买的是生鲜商品，请仔细检查商品是否符合要求，如有问题可让机器人带回门店，在小程序端申请售后，详情也可以联系我们的客服人员。");
+    voiceTextObj.insert("codeFalse","验证码错误。");
+    voiceTextObj.insert("receivedGoods","感谢您选择吉立达无人配送服务，期待下次再见。");
+    voiceTextObj.insert("dontMove","请不要移动我的位置，谢谢。");
+    voiceTextObj.insert("dontTouchStop","我正在工作，请不要按急停按钮，谢谢。");
+    voiceTextObj.insert("openDoor","正在打开仓门，请稍等。");
+    voiceTextObj.insert("fuYi","我要去负一楼");
+    voiceTextObj.insert("fuEr","我要去负二楼");
+    voiceTextObj.insert("fuSan","我要去负三楼");
+    voiceTextObj.insert("yi","我要去一楼");
+    voiceTextObj.insert("er","我要去二楼");
+    voiceTextObj.insert("san","我要去三楼");
+    voiceTextObj.insert("si","我要去四楼");
+    voiceTextObj.insert("wu","我要去五楼");
+    voiceTextObj.insert("liu","我要去六楼");
+    voiceTextObj.insert("qi","我要去七楼");
+    voiceTextObj.insert("ba","我要去八楼");
+    voiceTextObj.insert("jiu","我要去九楼");
+    voiceTextObj.insert("shi","我要去十楼");
+    voiceTextObj.insert("shiYi","我要去十一楼");
+    voiceTextObj.insert("shiEr","我要去十二楼");
+    voiceTextObj.insert("shiSan","我要去十三楼");
+    voiceTextObj.insert("shiSi","我要去十四楼");
+    voiceTextObj.insert("shiWu","我要去十五楼");
+    voiceTextObj.insert("shiLiu","我要去十六楼");
+    voiceTextObj.insert("shiQi","我要去十七楼");
+    voiceTextObj.insert("shiBa","我要去十八楼");
+    voiceTextObj.insert("shiJiu","我要去十九楼");
+    voiceTextObj.insert("erShi","我要去二十楼");
+    voiceTextObj.insert("erShiYi","我要去二十一楼");
+    voiceTextObj.insert("erShiEr","我要去二十二楼");
+    voiceTextObj.insert("erShiSan","我要去二十三楼");
+    voiceTextObj.insert("erShiSi","我要去二十四楼");
+    voiceTextObj.insert("erShiWu","我要去二十五楼");
+    voiceTextObj.insert("erShiLiu","我要去二十六楼");
+    voiceTextObj.insert("erShiQi","我要去二十七楼");
+    voiceTextObj.insert("erShiBa","我要去二十八楼");
+    voiceTextObj.insert("erShiJiu","我要去二十九楼");
+    voiceTextObj.insert("sanShi","我要去三十楼");
+    voiceTextObj.insert("sanShiYi","我要去三十一楼");
+    voiceTextObj.insert("sanShiEr","我要去三十二楼");
+    voiceTextObj.insert("sanShiSan","我要去三十三楼");
+    voiceTextObj.insert("sanShiSi","我要去三十四楼");
+    voiceTextObj.insert("sanShiWu","我要去三十五楼");
+    voiceTextObj.insert("sanShiLiu","我要去三十六楼");
+    voiceTextObj.insert("sanShiQi","我要去三十七楼");
+    voiceTextObj.insert("sanShiBa","我要去三十八楼");
+    voiceTextObj.insert("sanShiJiu","我要去三十九楼");
+    voiceTextObj.insert("siShi","我要去四十楼");
+    _configJson.insert("voiceText",voiceTextObj);
+    QJsonDocument doc;
+    doc.setObject(_configJson);
+    QByteArray configBytes = doc.toJson(QJsonDocument::Indented);
+    QFile configfile(_configPath);
+    QDir dir = QFileInfo(configfile).dir();
+    if(!dir.exists()){
+        dir.mkpath(dir.path());
+    }
+    configfile.open(QIODevice::WriteOnly);
+    configfile.write(configBytes);
+    configfile.close();
+}
+void Config::repairConfigFile(){
+    if(_configJson.value("advertWordList")==QJsonValue::Undefined){
+        _configJson.insert("advertWordList",QJsonArray({"嗨！我是吉立达机器人超市的小吉机器人，来扫码了解我一下吧，我可以24小时无人接触送货到家，亲，新活动新商品我们在持续增加中，每天都有不一样，要记的常来微信小程序哟！爱 你 哟！"}));
+    }
+    if(_configJson.value("areaName")==QJsonValue::Undefined){
+        _configJson.insert("areaName","");
+    }
+    if(_configJson.value("password")==QJsonValue::Undefined){
+        _configJson.insert("password","");
+    }
+    if(_configJson.value("isUsingElevatorAdvert")==QJsonValue::Undefined){
+        _configJson.insert("isUsingElevatorAdvert",false);
+    }
+    if(_configJson.value("isUsingLowPowerVoice")==QJsonValue::Undefined){
+        _configJson.insert("isUsingLowPowerVoice",false);
+    }
+    if(_configJson.value("videoSinceTime")==QJsonValue::Undefined){
+        _configJson.insert("videoSinceTime",2);//录制视频间隔时间，单位：分钟
+    }
+    if(_configJson.value("pictureNumber")==QJsonValue::Undefined){
+        _configJson.insert("pictureNumber",100);//图片数量
+    }
+    if(_configJson.value("videoNumber")==QJsonValue::Undefined){
+        _configJson.insert("videoNumber",10);//视频数量
+    }
+    if(_configJson.value("isUsingAutoUpdateMap")==QJsonValue::Undefined){
+        _configJson.insert("isUsingAutoUpdateMap",false);
+    }
+    if(_configJson.value("baiduToken")==QJsonValue::Undefined){
+        QJsonObject baiduTokenObj;
+        baiduTokenObj.insert("access_token","24.358c98513907923b89347c9bae5b9192.2592000.1640490896.282335-17650598");
+        baiduTokenObj.insert("expires_in",2592000);
+        baiduTokenObj.insert("getTime",1637898896);
+        baiduTokenObj.insert("refresh_token","25.5f2d4275d6730461048f1b655e833c1c.315360000.1953258896.282335-17650598");
+        baiduTokenObj.insert("scope","brain_asr_async brain_speech_realtime audio_voice_assistant_get brain_enhanced_asr audio_tts_post public brain_all_scope picchain_test_picchain_api_scope wise_adapt lebo_resource_base lightservice_public hetu_basic lightcms_map_poi kaidian_kaidian ApsMisTest_Test权限 vis-classify_flower lpq_开放 cop_helloScope ApsMis_fangdi_permission smartapp_snsapi_base smartapp_mapp_dev_manage iop_autocar oauth_tp_app smartapp_smart_game_openapi oauth_sessionkey smartapp_swanid_verify smartapp_opensource_openapi smartapp_opensource_recapi fake_face_detect_开放Scope vis-ocr_虚拟人物助理 idl-video_虚拟人物助理 smartapp_component smartapp_search_plugin avatar_video_test b2b_tp_openapi b2b_tp_openapi_online");
+        baiduTokenObj.insert("session_key","9mzdCPHWeJB5KH7gSDmbqVicCe76YEiIJIWPgnuGaB05OT2zNPdQmoQWXgkfPjWV/R559xoQcEoL1kK1+F5AsRAKLpah7Q==");
+        baiduTokenObj.insert("session_secret","9b249aa0b1f498758d22023e05400dd2");
+        _configJson.insert("baiduToken",baiduTokenObj);
+    }else{
+        QJsonObject baiduTokenObj=_configJson.value("baiduToken").toObject();
+        if(baiduTokenObj.value("access_token")==QJsonValue::Undefined){
+            baiduTokenObj.insert("access_token","24.358c98513907923b89347c9bae5b9192.2592000.1640490896.282335-17650598");
+        }
+        if(baiduTokenObj.value("expires_in")==QJsonValue::Undefined){
+            baiduTokenObj.insert("expires_in",2592000);
+        }
+        if(baiduTokenObj.value("getTime")==QJsonValue::Undefined){
+            baiduTokenObj.insert("getTime",1637898896);
+        }
+        if(baiduTokenObj.value("refresh_token")==QJsonValue::Undefined){
+            baiduTokenObj.insert("refresh_token","25.5f2d4275d6730461048f1b655e833c1c.315360000.1953258896.282335-17650598");
+        }
+        if(baiduTokenObj.value("scope")==QJsonValue::Undefined){
+            baiduTokenObj.insert("scope","brain_asr_async brain_speech_realtime audio_voice_assistant_get brain_enhanced_asr audio_tts_post public brain_all_scope picchain_test_picchain_api_scope wise_adapt lebo_resource_base lightservice_public hetu_basic lightcms_map_poi kaidian_kaidian ApsMisTest_Test权限 vis-classify_flower lpq_开放 cop_helloScope ApsMis_fangdi_permission smartapp_snsapi_base smartapp_mapp_dev_manage iop_autocar oauth_tp_app smartapp_smart_game_openapi oauth_sessionkey smartapp_swanid_verify smartapp_opensource_openapi smartapp_opensource_recapi fake_face_detect_开放Scope vis-ocr_虚拟人物助理 idl-video_虚拟人物助理 smartapp_component smartapp_search_plugin avatar_video_test b2b_tp_openapi b2b_tp_openapi_online");
+        }
+        if(baiduTokenObj.value("session_key")==QJsonValue::Undefined){
+            baiduTokenObj.insert("session_key","9mzdCPHWeJB5KH7gSDmbqVicCe76YEiIJIWPgnuGaB05OT2zNPdQmoQWXgkfPjWV/R559xoQcEoL1kK1+F5AsRAKLpah7Q==");
+        }
+        if(baiduTokenObj.value("session_secret")==QJsonValue::Undefined){
+            baiduTokenObj.insert("session_secret","9b249aa0b1f498758d22023e05400dd2");
+        }
+        _configJson.insert("baiduToken",baiduTokenObj);
+    }
+    if(_configJson.value("path")==QJsonValue::Undefined){
+        QJsonObject pathObj;
+        pathObj.insert("baiduVoicePath","/DeliveryRobot/DeliveryRobot/Music/BaiduVoice");
+        pathObj.insert("mapPath","/jld_profile");
+        pathObj.insert("notePath","/DeliveryRobot/DeliveryRobot/Note");
+        pathObj.insert("vedioPath","/DeliveryRobot/DeliveryRobot/Camera/Vedio");
+        pathObj.insert("imagePath","/DeliveryRobot/DeliveryRobot/Camera/Image");
+        pathObj.insert("upperSoftPath","/DeliveryRobot/DeliveryRobot/Download/UpperSoft");
+        pathObj.insert("middleSoftPath","/DeliveryRobot/DeliveryRobot/Download/MiddleSoft");
+        pathObj.insert("lowerSoftPath","/DeliveryRobot/DeliveryRobot/Download/LowerSoft");
+        pathObj.insert("robotInfoPath","/DeliveryRobot/DeliveryRobot/Config/robotInfo.json");
+        _configJson.insert("path",pathObj);
+    }else{
+        QJsonObject pathObj=_configJson.value("path").toObject();
+        if(pathObj.value("baiduVoicePath")==QJsonValue::Undefined){
+            pathObj.insert("baiduVoicePath","/DeliveryRobot/DeliveryRobot/Music/BaiduVoice");
+        }
+        if(pathObj.value("mapPath")==QJsonValue::Undefined){
+            pathObj.insert("mapPath","/jld_profile");
+        }
+        if(pathObj.value("notePath")==QJsonValue::Undefined){
+            pathObj.insert("notePath","/DeliveryRobot/DeliveryRobot/Note");
+        }
+        if(pathObj.value("provincesPath")==QJsonValue::Undefined){
+            pathObj.insert("provincesPath","/DeliveryRobot/DeliveryRobot/Config/address_data.json");
+        }
+        if(pathObj.value("videoPath")==QJsonValue::Undefined){
+            pathObj.insert("videoPath","/DeliveryRobot/DeliveryRobot/Camera/Video");
+        }
+        if(pathObj.value("imagePath")==QJsonValue::Undefined){
+            pathObj.insert("imagePath","/DeliveryRobot/DeliveryRobot/Camera/Image");
+        }
+        if(pathObj.value("upperSoftPath")==QJsonValue::Undefined){
+            pathObj.insert("upperSoftPath","/DeliveryRobot/DeliveryRobot/Download/UpperSoft");
+        }
+        if(pathObj.value("middleSoftPath")==QJsonValue::Undefined){
+            pathObj.insert("middleSoftPath","/DeliveryRobot/DeliveryRobot/Download/MiddleSoft");
+        }
+        if(pathObj.value("lowerSoftPath")==QJsonValue::Undefined){
+            pathObj.insert("lowerSoftPath","/DeliveryRobot/DeliveryRobot/Download/LowerSoft");
+        }
+        if(pathObj.value("robotInfoPath")==QJsonValue::Undefined){
+            pathObj.insert("robotInfoPath","/DeliveryRobot/DeliveryRobot/Config/robotInfo.json");
+        }
+        _configJson.insert("path",pathObj);
+    }
+    if(_configJson.value("voicePerson")==QJsonValue::Undefined){
+        QJsonObject voicePersonObj;
+        voicePersonObj.insert("per",4);
+        voicePersonObj.insert("pit",5);
+        voicePersonObj.insert("spd",5);
+        voicePersonObj.insert("vol",5);
+        _configJson.insert("voicePerson",voicePersonObj);
+    }else{
+        QJsonObject voicePersonObj=_configJson.value("voicePerson").toObject();
+        if(voicePersonObj.value("per")==QJsonValue::Undefined){
+            voicePersonObj.insert("per",4);
+        }
+        if(voicePersonObj.value("pit")==QJsonValue::Undefined){
+            voicePersonObj.insert("pit",5);
+        }
+        if(voicePersonObj.value("spd")==QJsonValue::Undefined){
+            voicePersonObj.insert("spd",5);
+        }
+        if(voicePersonObj.value("vol")==QJsonValue::Undefined){
+            voicePersonObj.insert("vol",5);
+        }
+        _configJson.insert("voicePerson",voicePersonObj);
+    }
+    if(_configJson.value("voiceText")==QJsonValue::Undefined){
+        QJsonObject voiceTextObj;
+        voiceTextObj.insert("dontTouchMe","别碰我，谢谢。");
+        voiceTextObj.insert("init","初始化完成，现在可以送货了。");
+        voiceTextObj.insert("noPower","我快没电了，请给我充电吧。");
+        voiceTextObj.insert("startSendGoods","送货去咯，待会儿见。");
+        voiceTextObj.insert("test","这是一段测试语音，如果还可以，点击应用吧。");
+        voiceTextObj.insert("retentionGoods","商品滞留了，处理一下吧。");
+        voiceTextObj.insert("returnGoods","客户退货了，处理一下吧。");
+        voiceTextObj.insert("elevatorGiveWayIn","您好，请把中间的位置留给我，谢谢。");
+        voiceTextObj.insert("elevatorGiveWayOut","我要出电梯了，请让一下，谢谢。");
+        voiceTextObj.insert("codeTrue","如您购买的是生鲜商品，请仔细检查商品是否符合要求，如有问题可让机器人带回门店，在小程序端申请售后，详情也可以联系我们的客服人员。");
+        voiceTextObj.insert("codeFalse","验证码错误。");
+        voiceTextObj.insert("receivedGoods","感谢您选择吉立达无人配送服务，期待下次再见。");
+        voiceTextObj.insert("dontMove","请不要移动我的位置，谢谢。");
+        voiceTextObj.insert("dontTouchStop","我正在工作，请不要按急停按钮，谢谢。");
+        voiceTextObj.insert("openDoor","正在打开仓门，请稍等。");
+        voiceTextObj.insert("fuYi","我要去负一楼");
+        voiceTextObj.insert("fuEr","我要去负二楼");
+        voiceTextObj.insert("fuSan","我要去负三楼");
+        voiceTextObj.insert("yi","我要去一楼");
+        voiceTextObj.insert("er","我要去二楼");
+        voiceTextObj.insert("san","我要去三楼");
+        voiceTextObj.insert("si","我要去四楼");
+        voiceTextObj.insert("wu","我要去五楼");
+        voiceTextObj.insert("liu","我要去六楼");
+        voiceTextObj.insert("qi","我要去七楼");
+        voiceTextObj.insert("ba","我要去八楼");
+        voiceTextObj.insert("jiu","我要去九楼");
+        voiceTextObj.insert("shi","我要去十楼");
+        voiceTextObj.insert("shiYi","我要去十一楼");
+        voiceTextObj.insert("shiEr","我要去十二楼");
+        voiceTextObj.insert("shiSan","我要去十三楼");
+        voiceTextObj.insert("shiSi","我要去十四楼");
+        voiceTextObj.insert("shiWu","我要去十五楼");
+        voiceTextObj.insert("shiLiu","我要去十六楼");
+        voiceTextObj.insert("shiQi","我要去十七楼");
+        voiceTextObj.insert("shiBa","我要去十八楼");
+        voiceTextObj.insert("shiJiu","我要去十九楼");
+        voiceTextObj.insert("erShi","我要去二十楼");
+        voiceTextObj.insert("erShiYi","我要去二十一楼");
+        voiceTextObj.insert("erShiEr","我要去二十二楼");
+        voiceTextObj.insert("erShiSan","我要去二十三楼");
+        voiceTextObj.insert("erShiSi","我要去二十四楼");
+        voiceTextObj.insert("erShiWu","我要去二十五楼");
+        voiceTextObj.insert("erShiLiu","我要去二十六楼");
+        voiceTextObj.insert("erShiQi","我要去二十七楼");
+        voiceTextObj.insert("erShiBa","我要去二十八楼");
+        voiceTextObj.insert("erShiJiu","我要去二十九楼");
+        voiceTextObj.insert("sanShi","我要去三十楼");
+        voiceTextObj.insert("sanShiYi","我要去三十一楼");
+        voiceTextObj.insert("sanShiEr","我要去三十二楼");
+        voiceTextObj.insert("sanShiSan","我要去三十三楼");
+        voiceTextObj.insert("sanShiSi","我要去三十四楼");
+        voiceTextObj.insert("sanShiWu","我要去三十五楼");
+        voiceTextObj.insert("sanShiLiu","我要去三十六楼");
+        voiceTextObj.insert("sanShiQi","我要去三十七楼");
+        voiceTextObj.insert("sanShiBa","我要去三十八楼");
+        voiceTextObj.insert("sanShiJiu","我要去三十九楼");
+        voiceTextObj.insert("siShi","我要去四十楼");
+        _configJson.insert("voiceText",voiceTextObj);
+    }else{
+        QJsonObject voiceTextObj=_configJson.value("voiceText").toObject();
+        if(voiceTextObj.value("dontTouchMe")==QJsonValue::Undefined){
+            voiceTextObj.insert("dontTouchMe","别碰我，谢谢。");
+        }
+        if(voiceTextObj.value("init")==QJsonValue::Undefined){
+            voiceTextObj.insert("init","初始化完成，现在可以送货了。");
+        }
+        if(voiceTextObj.value("noPower")==QJsonValue::Undefined){
+            voiceTextObj.insert("noPower","我快没电了，请给我充电吧。");
+        }
+        if(voiceTextObj.value("test")==QJsonValue::Undefined){
+            voiceTextObj.insert("test","这是一段测试语音，如果还可以，点击应用吧。");
+        }
+        if(voiceTextObj.value("retentionGoods")==QJsonValue::Undefined){
+            voiceTextObj.insert("retentionGoods","商品滞留了，处理一下吧。");
+        }
+        if(voiceTextObj.value("returnGoods")==QJsonValue::Undefined){
+            voiceTextObj.insert("returnGoods","客户退货了，处理一下吧。");
+        }
+        if(voiceTextObj.value("elevatorGiveWayIn")==QJsonValue::Undefined){
+            voiceTextObj.insert("elevatorGiveWayIn","您好，请把中间的位置留给我，谢谢。");
+        }
+        if(voiceTextObj.value("elevatorGiveWayOut")==QJsonValue::Undefined){
+            voiceTextObj.insert("elevatorGiveWayOut","我要出电梯了，请让一下，谢谢。");
+        }
+        if(voiceTextObj.value("codeTrue")==QJsonValue::Undefined){
+            voiceTextObj.insert("codeTrue","如您购买的是生鲜商品，请仔细检查商品是否符合要求，如有问题可让机器人带回门店，在小程序端申请售后，详情也可以联系我们的客服人员。");
+        }
+        if(voiceTextObj.value("codeFalse")==QJsonValue::Undefined){
+            voiceTextObj.insert("codeFalse","验证码错误。");
+        }
+        if(voiceTextObj.value("receivedGoods")==QJsonValue::Undefined){
+            voiceTextObj.insert("receivedGoods","感谢您选择吉立达无人配送服务，期待下次再见。");
+        }  
+        if(voiceTextObj.value("dontMove")==QJsonValue::Undefined){
+            voiceTextObj.insert("dontMove","请不要移动我的位置，谢谢。");
+        }
+        if(voiceTextObj.value("dontTouchStop")==QJsonValue::Undefined){
+            voiceTextObj.insert("dontTouchStop","我正在工作，请不要按急停按钮，谢谢。");
+        }
+        if(voiceTextObj.value("fuYi")==QJsonValue::Undefined){
+            voiceTextObj.insert("fuYi","我要去负一楼");
+        }
+        if(voiceTextObj.value("fuEr")==QJsonValue::Undefined){
+            voiceTextObj.insert("fuEr","我要去负二楼");
+        }
+        if(voiceTextObj.value("fuSan")==QJsonValue::Undefined){
+            voiceTextObj.insert("fuSan","我要去负三楼");
+        }
+        if(voiceTextObj.value("yi")==QJsonValue::Undefined){
+            voiceTextObj.insert("yi","我要去一楼");
+        }
+        if(voiceTextObj.value("er")==QJsonValue::Undefined){
+            voiceTextObj.insert("er","我要去二楼");
+        }
+        if(voiceTextObj.value("san")==QJsonValue::Undefined){
+            voiceTextObj.insert("san","我要去三楼");
+        }
+        if(voiceTextObj.value("si")==QJsonValue::Undefined){
+            voiceTextObj.insert("si","我要去四楼");
+        }
+        if(voiceTextObj.value("wu")==QJsonValue::Undefined){
+            voiceTextObj.insert("wu","我要去五楼");
+        }
+        if(voiceTextObj.value("liu")==QJsonValue::Undefined){
+            voiceTextObj.insert("liu","我要去六楼");
+        }
+        if(voiceTextObj.value("qi")==QJsonValue::Undefined){
+            voiceTextObj.insert("qi","我要去七楼");
+        }
+        if(voiceTextObj.value("ba")==QJsonValue::Undefined){
+            voiceTextObj.insert("ba","我要去八楼");
+        }
+        if(voiceTextObj.value("jiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("jiu","我要去九楼");
+        }
+        if(voiceTextObj.value("shi")==QJsonValue::Undefined){
+            voiceTextObj.insert("shi","我要去十楼");
+        }
+        if(voiceTextObj.value("shiYi")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiYi","我要去十一楼");
+        }
+        if(voiceTextObj.value("shiEr")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiEr","我要去十二楼");
+        }
+        if(voiceTextObj.value("shiSan")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiSan","我要去十三楼");
+        }
+        if(voiceTextObj.value("shiSi")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiSi","我要去十四楼");
+        }
+        if(voiceTextObj.value("shiWu")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiWu","我要去十五楼");
+        }
+        if(voiceTextObj.value("shiLiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiLiu","我要去十六楼");
+        }
+        if(voiceTextObj.value("shiQi")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiQi","我要去十七楼");
+        }
+        if(voiceTextObj.value("shiBa")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiBa","我要去十八楼");
+        }
+        if(voiceTextObj.value("shiJiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("shiJiu","我要去十九楼");
+        }
+        if(voiceTextObj.value("erShi")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShi","我要去二十楼");
+        }
+        if(voiceTextObj.value("erShiYi")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiYi","我要去二十一楼");
+        }
+        if(voiceTextObj.value("erShiEr")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiEr","我要去二十二楼");
+        }
+        if(voiceTextObj.value("erShiSan")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiSan","我要去二十三楼");
+        }
+        if(voiceTextObj.value("erShiSi")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiSi","我要去二十四楼");
+        }
+        if(voiceTextObj.value("erShiWu")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiWu","我要去二十五楼");
+        }
+        if(voiceTextObj.value("erShiLiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiLiu","我要去二十六楼");
+        }
+        if(voiceTextObj.value("erShiQi")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiQi","我要去二十七楼");
+        }
+        if(voiceTextObj.value("erShiBa")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiBa","我要去二十八楼");
+        }
+        if(voiceTextObj.value("erShiJiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("erShiJiu","我要去二十九楼");
+        }
+        if(voiceTextObj.value("sanShi")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShi","我要去三十楼");
+        }
+        if(voiceTextObj.value("sanShiYi")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiYi","我要去三十一楼");
+        }
+        if(voiceTextObj.value("sanShiEr")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiEr","我要去三十二楼");
+        }
+        if(voiceTextObj.value("sanShiSan")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiSan","我要去三十三楼");
+        }
+        if(voiceTextObj.value("sanShiSi")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiSi","我要去三十四楼");
+        }
+        if(voiceTextObj.value("sanShiWu")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiWu","我要去三十五楼");
+        }
+        if(voiceTextObj.value("sanShiLiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiLiu","我要去三十六楼");
+        }
+        if(voiceTextObj.value("sanShiQi")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiQi","我要去三十七楼");
+        }
+        if(voiceTextObj.value("sanShiBa")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiBa","我要去三十八楼");
+        }
+        if(voiceTextObj.value("sanShiJiu")==QJsonValue::Undefined){
+            voiceTextObj.insert("sanShiJiu","我要去三十九楼");
+        }
+        if(voiceTextObj.value("siShi")==QJsonValue::Undefined){
+            voiceTextObj.insert("siShi","我要去四十楼");
+        }
+        _configJson.insert("voiceText",voiceTextObj);
+    }
+    QJsonDocument doc;
+    doc.setObject(_configJson);
+    QByteArray configBytes = doc.toJson(QJsonDocument::Indented);
+    QFile configfile(_configPath);
+    QDir dir = QFileInfo(configfile).dir();
+    if(!dir.exists()){
+        dir.mkpath(dir.path());
+    }
+    configfile.open(QIODevice::WriteOnly);
+    configfile.write(configBytes);
+    configfile.close();
+}
+QJsonValue Config::getValue(QString key){
+    if(_configJson.value(key)==QJsonValue::Undefined){
+        return QJsonValue();
+    }else{
+        return _configJson.value(key);
+    }
+}
+void Config::setValue(QString key,QString value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,quint8 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,quint16 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,quint32 value){
+    _configJson.insert(key,(long long)value);
+    save();
+}
+void Config::setValue(QString key,quint64 value){
+    _configJson.insert(key,(long long)value);
+    save();
+}
+void Config::setValue(QString key,qint8 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,qint16 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,qint32 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,qint64 value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key,bool value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key, QJsonArray value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::setValue(QString key, QJsonObject value){
+    _configJson.insert(key,value);
+    save();
+}
+void Config::save(){
+    QJsonDocument configDoc;
+    configDoc.setObject(_configJson);
+    QByteArray toByte = configDoc.toJson(QJsonDocument::Indented);
+    QFile file(_configPath);
+    file.open(QIODevice::WriteOnly|QIODevice::Text);
+    file.write(toByte);
+    file.close();
+}
